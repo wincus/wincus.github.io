@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="">	
+<head>
+	<meta charset="utf-8"/>
+	<title>Salty Puppet - Wincus Random Notes</title>	
+	<meta name="author" content="wincus">
+	
+
+  <meta name="description" content="This article includes only my personal opinion, as usual, YMMV">
+
+
+
+	<link rel="stylesheet" href="http://wincus.github.io/theme/css/main.css" type="text/css" />
+		
+	  <script type="text/javascript" src="http://wincus.github.io/theme/js/custom_scripts.js"></script>
+
+
+    <link href="http://wincus.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Wincus Random Notes Atom Feed" />
+</head>
+	
+<body>
+
+    <div class="container">
+	  
+	  <header role="banner">
+	    <div class="feeds">
+	        <a href="http://wincus.github.io/feeds/all.atom.xml" rel="alternate"><img src="/theme/images/icons/feed-32px.png" alt="atom feed"/></a>
+	    </div>
+	      <nav class="pages">
+			  <a href="http://wincus.github.io/pages/about-me.html">About Me</a>
+	      </nav>
+		<a href="http://wincus.github.io" class="title">Wincus Random Notes</a>
+      </header>
+	
+	  <div class="wrapper">
+
+		  <div role="main" class="content">
+	<article class="full">
+		
+		<h1>Salty Puppet</h1>
+		
+<div class="metadata">
+  <time datetime="2014-11-18T00:00:00-03:00" pubdate>mar 18 noviembre 2014</time>
+    <address class="vcard author">
+      by <a class="url fn" href="http://wincus.github.io/author/wincus.html">wincus</a>
+    </address>
+  in <a href="http://wincus.github.io/category/devops.html">devops</a>
+<p class="tags">tagged <a href="http://wincus.github.io/tag/salt.html">salt</a>, <a href="http://wincus.github.io/tag/puppet.html">puppet</a>, <a href="http://wincus.github.io/tag/automation.html">automation</a></p></div>		
+		<p>Having worked with <a href="http://puppetlabs.com">puppet</a> for a long time, I run into
+<a href="http://saltstack.com">salt</a>. I was only looking for a remote execution tool,
+cause the natural choice under puppet environments,
+<a href="http://puppetlabs.com/mcollecive">mcollective</a>, seemed to complicate to
+install/configure/use/whatsoever.</p>
+<p>So I started digging salty waters, to find that salt was much more than a
+simple remote execution tool.</p>
+<ul>
+<li>salt is written in python, if you like python better than ruby, this is a
+   major advantage.</li>
+<li>salt can enforce the state of a target system, just like puppet</li>
+<li>states are written in yaml, easier to read and easier to write</li>
+<li>all salt states are rendered, which means that you can do things like:</li>
+</ul>
+<div class="highlight"><pre><span class="cp">{%</span> <span class="k">for</span> <span class="nv">mnt</span> <span class="k">in</span> <span class="nv">salt</span><span class="o">[</span><span class="s1">&#39;cmd.run&#39;</span><span class="o">](</span><span class="s1">&#39;ls /dev/data/moose*&#39;</span><span class="o">)</span><span class="nv">.split</span><span class="o">()</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">/MNT/moose</span><span class="cp">{{</span> <span class="nv">mnt</span><span class="o">[-</span><span class="m">1</span><span class="o">]</span> <span class="cp">}}</span><span class="x">:</span>
+<span class="x">  mount.mounted:</span>
+<span class="x">    - device: </span><span class="cp">{{</span> <span class="nv">mnt</span> <span class="cp">}}</span><span class="x"></span>
+<span class="x">    - fstype: xfs</span>
+<span class="x">    - mkmnt: True</span>
+<span class="x">  file.directory:</span>
+<span class="x">    - user: mfs</span>
+<span class="x">    - group: mfs</span>
+<span class="x">    - require:</span>
+<span class="x">      - user: mfs</span>
+<span class="x">      - group: mfs</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<ul>
+<li>you can even choose the render subsystem you like</li>
+<li>custom modules are extremely easy to write</li>
+<li>documentation is well organized and easy to follow</li>
+<li>The company behind it, SaltStack, is not offering a different product for
+   community and enterprise, as puppet. Their business model is based on
+   support services.</li>
+<li>at this very moment, salt github activity doubles puppet's (42k vs 20k commits)</li>
+<li>salts community seems to be friendlier than puppet</li>
+<li>salts momentum is much bigger, according to <a href="http://www.google.com/trends/explore#q=saltstack%2C%20puppetlabs&amp;cmpt=q">google
+   trends</a></li>
+<li>salt has native cloud controller included, supporting cloud big players like
+   amazon, google, docker, etc</li>
+<li>salt has a native event &amp; react subsytem, that allows you to react to events
+   if needed</li>
+<li>it can fetch states directly from your git repo, non error-prune intermediaries</li>
+<li>salt can run in multi-master mode</li>
+<li>salt can run minionless, using salt-ssh</li>
+<li>salt state ecosystem seems to be richer</li>
+<li>targeting at salt minions is incredibly flexible and powerful (batching
+   execution for example)</li>
+</ul>
+<p>Thanks for passing by!</p>	
+
+	</article>
+
+    <p>
+	<a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	</p>
+
+
+		  </div>	
+		  
+		  <div class="sidebar">
+		    <div class="sidebar-container" id="sidebar-container-fixed">
+
+
+  	          <nav>
+	            <h2>Categories</h2>
+	            <ul>
+	                <li class="active"><a href="http://wincus.github.io/category/devops.html">devops</a></li>
+	                <li ><a href="http://wincus.github.io/category/misc.html">misc</a></li>
+	            </ul>
+	          </nav>
+
+	            <aside>
+	            <h2>Social</h2>
+			      <ul class="social">
+				    <li><a href="https://twitter.com/jonwincus">@jonwincus</a><i></i></li>
+				    <li><a href="https://github.com/wincus">wincus</a><i></i></li>
+				    <li><a href="https://ar.linkedin.com/in/jonwincus">jonwincus</a><i></i></li>
+			      </ul>
+			    </aside>
+
+	        </div>
+		  </div>
+
+	  </div>
+
+      <footer>
+		<p role="contentinfo">
+		  wincus - Proudly powered by <a href="http://alexis.notmyidea.org/pelican/">pelican</a>. Theme <a href="https://github.com/fle/pelican-sober">pelican-sober</a>.
+    	</p>
+
+	  </footer>	
+
+	</div>
+	
+
+</body>
+</html>
