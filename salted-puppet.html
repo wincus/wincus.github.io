@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="">	
+<head>
+	<meta charset="utf-8"/>
+	<title>Salted Puppet - Wincus Random Notes</title>	
+	<meta name="author" content="wincus">
+	
+
+  <meta name="description" content="Just another ultra-biased salt vs puppet article.">
+
+
+
+	<link rel="stylesheet" href="http://wincus.github.io/theme/css/main.css" type="text/css" />
+		
+	  <script type="text/javascript" src="http://wincus.github.io/theme/js/custom_scripts.js"></script>
+
+
+    <link href="http://wincus.github.io/feeds/all.atom.xml" type="application/atom+xml" rel="alternate" title="Wincus Random Notes Atom Feed" />
+</head>
+	
+<body>
+
+    <div class="container">
+	  
+	  <header role="banner">
+	    <div class="feeds">
+	        <a href="http://wincus.github.io/feeds/all.atom.xml" rel="alternate"><img src="/theme/images/icons/feed-32px.png" alt="atom feed"/></a>
+	    </div>
+	      <nav class="pages">
+			  <a href="http://wincus.github.io/pages/about-me.html">About Me</a>
+	      </nav>
+		<a href="http://wincus.github.io" class="title">Wincus Random Notes</a>
+      </header>
+	
+	  <div class="wrapper">
+
+		  <div role="main" class="content">
+	<article class="full">
+		
+		<h1>Salted Puppet</h1>
+		
+<div class="metadata">
+  <time datetime="2014-11-18T00:00:00-03:00" pubdate>mar 18 noviembre 2014</time>
+    <address class="vcard author">
+      by <a class="url fn" href="http://wincus.github.io/author/wincus.html">wincus</a>
+    </address>
+  in <a href="http://wincus.github.io/category/devops.html">devops</a>
+<p class="tags">tagged <a href="http://wincus.github.io/tag/salt.html">salt</a>, <a href="http://wincus.github.io/tag/puppet.html">puppet</a>, <a href="http://wincus.github.io/tag/automation.html">automation</a></p></div>		
+		<p>Having worked with <a href="http://puppetlabs.com">puppet</a> for a long time, I run into
+<a href="http://saltstack.com">salt</a> looking for a remote execution tool, as the 
+natural choice under puppet environments, <a href="http://puppetlabs.com
+/mcollective">mcollective</a>, seemed to complicate to install/configure/use/whatsoever.</p>
+<p>So I started digging salty waters, to find that salt was much more than a
+simple remote execution tool.</p>
+<h2>Targeting</h2>
+<p>One of the challenges about remote execution is targeting. Of course you want
+parallel remote execution, but this feature is worthless unless you have smart 
+targeting subsystem.</p>
+<p>How smart is Salt targeting? <a href="http://docs.saltstack.com/en/late
+st/topics/targeting/">Pretty much!</a></p>
+<p>For example, from the documentation:</p>
+<p><code>salt -G 'os:RedHat' --batch-size 25% apache.signal restart</code></p>
+<p>This will restart apache on all minions running RedHat, but wait, not all at
+the same time, lets trigger 25% first, an then roll the window until you get
+to 100%. </p>
+<h2>State Enforcing</h2>
+<p>Salt can also enforce the state of a target system, just like puppet. </p>
+<p><a href="http://docs.saltstack.com/en/latest/topics/tutorials/starting_states.
+html">State</a> 
+files are written in <a href="http://www.yaml.org/">yaml</a> honoring Salt's foundation 
+principles: simplicity, simplicity, simplicity.</p>
+<p>This yaml is only data representation of the states. As data, in reality we are 
+just talking about dictionaries, lists, strings and numbers. If you are coming 
+from puppet, you will need some time to realize that in Salts world it is you 
+who decide how complex things are. The other big difference, in my opinion, is
+that state files in Salt are rendered, and better, you are free to choose the
+render engine, as long as delivers state data to Salt. </p>
+<p>Unless told otherwise, state files are first rendered using the default 
+renderer, <a href="http://jinja.pocoo.org/">Jinja</a> before getting to the YAML parser.</p>
+<p>This allows great flexibility, as shown in this example taken from the
+documentation:</p>
+<div class="highlight"><pre><span class="cp">{%</span> <span class="k">for</span> <span class="nv">mnt</span> <span class="k">in</span> <span class="nv">salt</span><span class="o">[</span><span class="s1">&#39;cmd.run&#39;</span><span class="o">](</span><span class="s1">&#39;ls /dev/data/moose*&#39;</span><span class="o">)</span><span class="nv">.split</span><span class="o">()</span> <span class="cp">%}</span><span class="x"></span>
+<span class="x">/MNT/moose</span><span class="cp">{{</span> <span class="nv">mnt</span><span class="o">[-</span><span class="m">1</span><span class="o">]</span> <span class="cp">}}</span><span class="x">:</span>
+<span class="x">  mount.mounted:</span>
+<span class="x">    - device: </span><span class="cp">{{</span> <span class="nv">mnt</span> <span class="cp">}}</span><span class="x"></span>
+<span class="x">    - fstype: xfs</span>
+<span class="x">    - mkmnt: True</span>
+<span class="x">  file.directory:</span>
+<span class="x">    - user: mfs</span>
+<span class="x">    - group: mfs</span>
+<span class="x">    - require:</span>
+<span class="x">      - user: mfs</span>
+<span class="x">      - group: mfs</span>
+<span class="cp">{%</span> <span class="k">endfor</span> <span class="cp">%}</span><span class="x"></span>
+</pre></div>
+
+
+<p>You have a pretty bast <a href="http://docs.saltstack.com/en/latest/ref/modul
+es/all/index.html#all-salt-modules">module</a> ecosystem to work with. And if that is not
+enough you can write your own. Yes, writing custom models is really simple.</p>
+<h2>Cloud friendly</h2>
+<p>Most management and configuration tools out there were born before the Cloud 
+existed or be so popular, so developers didn't pay much attention to it until 
+it was to late.</p>
+<p>Salt, on the other hand, was created with <a href="http://docs.saltstack.com/en/la
+test/topics/cloud/">cloud</a> in mind from the beginning. This means, in my opinion, two 
+important things. First you get a single interface for every cloud provider 
+out there (Salt supports big cloud players like EC2, DigitalOcean, Azure, GCE, 
+LXC, Docker, OpenStack, SoftLayer, and others). The second big advantage is
+that you can manage your multi-provider instances from your state files:</p>
+<div class="highlight"><pre>my-instance-name:
+  cloud.present:
+    - provider: my-ec2-config
+    - image: ami-1624987f
+    - size: &#39;t1.micro&#39;
+    - ssh_username: ec2-user
+    - securitygroup: default
+    - delvol_on_destroy: True
+</pre></div>
+
+
+<h2>Reactor</h2>
+<p>State management is great, but sometimes it just won't fit in real world 
+scenarios. Here is where the Reactor systems comes to the rescue. It's basic 
+workflow is pretty simple. There is an event bus, and every event fired into 
+the bus has a tag and a data structure, a dict with information about the 
+event. In order to react to this events, you can write state files and map 
+them with the events that need special attention.</p>
+<p>For example, a typical use case is when you fire up a new production cloud 
+web instance. This will fire up a cloud event into the event bus with 
+information about this new instance. Then should be straightforward to write 
+some sls files in order to configure instance backup and monitoring.</p>
+<h2>Minionless nodes</h2>
+<p>Oh Yeah, Salt can control your nodes without the need to install a client
+there, just by having <a href="http://docs.saltstack.com/en/latest/topics/ssh/">ssh</a>
+access to it. Of course it won't scale well if you have many nodes, and will 
+be slower than the minionful counterpart, but its up to you. At the end, you 
+get to decide how complex your setup will be, remember?</p>
+<h2>Documentation</h2>
+<p>Well organized and easy to follow, <a href="http://docs.saltstack.com/
+en/latest/">documentation</a> is another strong thing about Salt. Transaltions are quite slow 
+to arrive, though. If you are considering donating some time to the project, 
+helping with <a href="https://www.transifex.com/projects/p/salt/">translations</a> are a 
+always a good option.</p>	
+
+	</article>
+
+    <p>
+	<a href="https://twitter.com/share" class="twitter-share-button" data-via="" data-lang="en" data-size="large" data-related="">Tweet</a>
+	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+	</p>
+
+
+		  </div>	
+		  
+		  <div class="sidebar">
+		    <div class="sidebar-container" id="sidebar-container-fixed">
+
+
+  	          <nav>
+	            <h2>Categories</h2>
+	            <ul>
+	                <li class="active"><a href="http://wincus.github.io/category/devops.html">devops</a></li>
+	                <li ><a href="http://wincus.github.io/category/misc.html">misc</a></li>
+	            </ul>
+	          </nav>
+
+	            <aside>
+	            <h2>Social</h2>
+			      <ul class="social">
+				    <li><a href="https://twitter.com/jonwincus">@jonwincus</a><i></i></li>
+				    <li><a href="https://github.com/wincus">wincus</a><i></i></li>
+				    <li><a href="https://ar.linkedin.com/in/jonwincus">jonwincus</a><i></i></li>
+			      </ul>
+			    </aside>
+
+	        </div>
+		  </div>
+
+	  </div>
+
+      <footer>
+		<p role="contentinfo">
+		  wincus - Proudly powered by <a href="http://alexis.notmyidea.org/pelican/">pelican</a>. Theme <a href="https://github.com/fle/pelican-sober">pelican-sober</a>.
+    	</p>
+
+	  </footer>	
+
+	</div>
+	
+	  <script>
+		var _gaq=[['_setAccount','UA-57105532-1'],['_trackPageview']];
+		(function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+		g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+		s.parentNode.insertBefore(g,s)}(document,'script'));
+	  </script>
+
+</body>
+</html>
