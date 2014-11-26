@@ -45,7 +45,7 @@
       by <a class="url fn" href="http://wincus.github.io/author/wincus.html">wincus</a>
     </address>
   in <a href="http://wincus.github.io/category/devops.html">devops</a>
-<p class="tags">tagged <a href="http://wincus.github.io/tag/salt.html">salt</a>, <a href="http://wincus.github.io/tag/puppet.html">puppet</a>, <a href="http://wincus.github.io/tag/automation.html">automation</a></p></div>		
+<p class="tags">tagged <a href="http://wincus.github.io/tag/salt.html">salt</a>, <a href="http://wincus.github.io/tag/puppet.html">puppet</a>, <a href="http://wincus.github.io/tag/automation.html">automation</a>, <a href="http://wincus.github.io/tag/devops.html">devops</a></p></div>		
 		<p>Having worked with <a href="http://puppetlabs.com">puppet</a> for a long time, I run into
 <a href="http://saltstack.com">salt</a> looking for a remote execution tool, as the 
 natural choice under puppet environments, <a href="http://puppetlabs.com
@@ -55,11 +55,11 @@ simple remote execution tool.</p>
 <h2>Targeting</h2>
 <p>One of the challenges about remote execution is targeting. Of course you want
 parallel remote execution in order to break the linear relation between
-execution time and number of targets nodes, but this feature is worthless
+execution time and number of target nodes, but this feature is worthless
 unless you have smart targeting subsystem.</p>
 <p>So, how smart is Salt targeting? <a href="http://docs.saltstack.com/en/late
 st/topics/targeting/">Pretty much!</a></p>
-<p>For example, from the documentation:</p>
+<p>For example, consider this example taken from the documentation:</p>
 <p><code>salt -G 'os:RedHat' --batch-size 25% apache.signal restart</code></p>
 <p>This will restart apache on all minions running RedHat, but wait, not all at
 the same time, lets trigger 25% first, an then roll the window until you get
@@ -67,9 +67,8 @@ to 100%. </p>
 <h2>State Enforcing</h2>
 <p>Salt can also enforce the state of a target system, just like puppet. </p>
 <p><a href="http://docs.saltstack.com/en/latest/topics/tutorials/starting_states.
-html">State</a> 
-files are written in <a href="http://www.yaml.org/">yaml</a> honoring Salt's foundation 
-principles: simplicity, simplicity, simplicity.</p>
+html">State</a> files are written in <a href="http://www.yaml.org/">yaml</a> honoring Salt's 
+foundation principles: simplicity, simplicity, simplicity.</p>
 <p>This yaml is only data representation of the states. As data, in reality we are 
 just talking about dictionaries, lists, strings and numbers. If you are coming 
 from puppet, you will need some time to realize that in Salts world it is you 
@@ -99,6 +98,11 @@ documentation:</p>
 <p>You have a pretty bast <a href="http://docs.saltstack.com/en/latest/ref/modul
 es/all/index.html#all-salt-modules">module</a> ecosystem to work with. And if that is not
 enough you can write your own. Yes, writing custom models is really simple.</p>
+<p>Another cool feature I like about Salt is how well plays with <a href="http://do
+cs.saltstack.com/en/latest/topics/tutorials/gitfs.html">git</a>. Salt can fetch your 
+state files (and pillar data) directly from one or more Git repos, mapping 
+automatically environment branch/tags identifiers. This allows you to trigger
+the magic on a single git commit.</p>
 <h2>Cloud friendly</h2>
 <p>Most management and configuration tools out there were born before the Cloud 
 existed or was so popular, so developers didn't pay much attention to it until 

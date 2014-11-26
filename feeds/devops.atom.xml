@@ -8,11 +8,11 @@ simple remote execution tool.&lt;/p&gt;
 &lt;h2&gt;Targeting&lt;/h2&gt;
 &lt;p&gt;One of the challenges about remote execution is targeting. Of course you want
 parallel remote execution in order to break the linear relation between
-execution time and number of targets nodes, but this feature is worthless
+execution time and number of target nodes, but this feature is worthless
 unless you have smart targeting subsystem.&lt;/p&gt;
 &lt;p&gt;So, how smart is Salt targeting? &lt;a href="http://docs.saltstack.com/en/late
 st/topics/targeting/"&gt;Pretty much!&lt;/a&gt;&lt;/p&gt;
-&lt;p&gt;For example, from the documentation:&lt;/p&gt;
+&lt;p&gt;For example, consider this example taken from the documentation:&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;salt -G 'os:RedHat' --batch-size 25% apache.signal restart&lt;/code&gt;&lt;/p&gt;
 &lt;p&gt;This will restart apache on all minions running RedHat, but wait, not all at
 the same time, lets trigger 25% first, an then roll the window until you get
@@ -20,9 +20,8 @@ to 100%. &lt;/p&gt;
 &lt;h2&gt;State Enforcing&lt;/h2&gt;
 &lt;p&gt;Salt can also enforce the state of a target system, just like puppet. &lt;/p&gt;
 &lt;p&gt;&lt;a href="http://docs.saltstack.com/en/latest/topics/tutorials/starting_states.
-html"&gt;State&lt;/a&gt; 
-files are written in &lt;a href="http://www.yaml.org/"&gt;yaml&lt;/a&gt; honoring Salt's foundation 
-principles: simplicity, simplicity, simplicity.&lt;/p&gt;
+html"&gt;State&lt;/a&gt; files are written in &lt;a href="http://www.yaml.org/"&gt;yaml&lt;/a&gt; honoring Salt's 
+foundation principles: simplicity, simplicity, simplicity.&lt;/p&gt;
 &lt;p&gt;This yaml is only data representation of the states. As data, in reality we are 
 just talking about dictionaries, lists, strings and numbers. If you are coming 
 from puppet, you will need some time to realize that in Salts world it is you 
@@ -52,6 +51,11 @@ documentation:&lt;/p&gt;
 &lt;p&gt;You have a pretty bast &lt;a href="http://docs.saltstack.com/en/latest/ref/modul
 es/all/index.html#all-salt-modules"&gt;module&lt;/a&gt; ecosystem to work with. And if that is not
 enough you can write your own. Yes, writing custom models is really simple.&lt;/p&gt;
+&lt;p&gt;Another cool feature I like about Salt is how well plays with &lt;a href="http://do
+cs.saltstack.com/en/latest/topics/tutorials/gitfs.html"&gt;git&lt;/a&gt;. Salt can fetch your 
+state files (and pillar data) directly from one or more Git repos, mapping 
+automatically environment branch/tags identifiers. This allows you to trigger
+the magic on a single git commit.&lt;/p&gt;
 &lt;h2&gt;Cloud friendly&lt;/h2&gt;
 &lt;p&gt;Most management and configuration tools out there were born before the Cloud 
 existed or was so popular, so developers didn't pay much attention to it until 
@@ -97,4 +101,4 @@ get to decide how complex your setup will be, remember?&lt;/p&gt;
 en/latest/"&gt;documentation&lt;/a&gt; is another strong thing about Salt. Transaltions are quite slow 
 to arrive, though. If you are considering donating some time to the project, 
 helping with &lt;a href="https://www.transifex.com/projects/p/salt/"&gt;translations&lt;/a&gt; are a 
-always a good option.&lt;/p&gt;</summary><category term="salt"></category><category term="puppet"></category><category term="automation"></category></entry></feed>
+always a good option.&lt;/p&gt;</summary><category term="salt"></category><category term="puppet"></category><category term="automation"></category><category term="devops"></category></entry></feed>
