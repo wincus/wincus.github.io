@@ -2,14 +2,15 @@
 <feed xmlns="http://www.w3.org/2005/Atom"><title>Wincus Random Notes</title><link href="http://wincus.github.io/" rel="alternate"></link><link href="http://wincus.github.io/feeds/devops.atom.xml" rel="self"></link><id>http://wincus.github.io/</id><updated>2014-11-18T00:00:00-03:00</updated><entry><title>Salted Puppet</title><link href="http://wincus.github.io/salted-puppet.html" rel="alternate"></link><updated>2014-11-18T00:00:00-03:00</updated><author><name>wincus</name></author><id>tag:wincus.github.io,2014-11-18:salted-puppet.html</id><summary type="html">&lt;p&gt;Having worked with &lt;a href="http://puppetlabs.com"&gt;puppet&lt;/a&gt; for a long time, I run into
 &lt;a href="http://saltstack.com"&gt;salt&lt;/a&gt; looking for a remote execution tool, as the 
 natural choice under puppet environments, &lt;a href="http://puppetlabs.com
-/mcollective"&gt;mcollective&lt;/a&gt;, seemed to complicate to install/configure/use/whatsoever.&lt;/p&gt;
+/mcollective"&gt;mcollective&lt;/a&gt; seemed to complicate to install/configure/use/whatsoever.&lt;/p&gt;
 &lt;p&gt;So I started digging salty waters, to find that salt was much more than a
 simple remote execution tool.&lt;/p&gt;
 &lt;h2&gt;Targeting&lt;/h2&gt;
 &lt;p&gt;One of the challenges about remote execution is targeting. Of course you want
-parallel remote execution, but this feature is worthless unless you have smart 
-targeting subsystem.&lt;/p&gt;
-&lt;p&gt;How smart is Salt targeting? &lt;a href="http://docs.saltstack.com/en/late
+parallel remote execution in order to break the linear relation between
+execution time and number of targets nodes, but this feature is worthless
+unless you have smart targeting subsystem.&lt;/p&gt;
+&lt;p&gt;So, how smart is Salt targeting? &lt;a href="http://docs.saltstack.com/en/late
 st/topics/targeting/"&gt;Pretty much!&lt;/a&gt;&lt;/p&gt;
 &lt;p&gt;For example, from the documentation:&lt;/p&gt;
 &lt;p&gt;&lt;code&gt;salt -G 'os:RedHat' --batch-size 25% apache.signal restart&lt;/code&gt;&lt;/p&gt;
@@ -26,10 +27,10 @@ principles: simplicity, simplicity, simplicity.&lt;/p&gt;
 just talking about dictionaries, lists, strings and numbers. If you are coming 
 from puppet, you will need some time to realize that in Salts world it is you 
 who decide how complex things are. The other big difference, in my opinion, is
-that state files in Salt are rendered, and better, you are free to choose the
-render engine, as long as delivers state data to Salt. &lt;/p&gt;
-&lt;p&gt;Unless told otherwise, state files are first rendered using the default 
-renderer, &lt;a href="http://jinja.pocoo.org/"&gt;Jinja&lt;/a&gt; before getting to the YAML parser.&lt;/p&gt;
+that state files in Salt are rendered, and gets even better, you are free to 
+choose the render engine, as long as delivers state data to Salt.  Unless told
+otherwise, state files are first rendered using the default renderer,
+&lt;a href="http://jinja.pocoo.org/"&gt;Jinja&lt;/a&gt; before getting to the YAML parser.&lt;/p&gt;
 &lt;p&gt;This allows great flexibility, as shown in this example taken from the
 documentation:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="cp"&gt;{%&lt;/span&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="nv"&gt;mnt&lt;/span&gt; &lt;span class="k"&gt;in&lt;/span&gt; &lt;span class="nv"&gt;salt&lt;/span&gt;&lt;span class="o"&gt;[&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;cmd.run&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;](&lt;/span&gt;&lt;span class="s1"&gt;&amp;#39;ls /dev/data/moose*&amp;#39;&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="nv"&gt;.split&lt;/span&gt;&lt;span class="o"&gt;()&lt;/span&gt; &lt;span class="cp"&gt;%}&lt;/span&gt;&lt;span class="x"&gt;&lt;/span&gt;
@@ -53,7 +54,7 @@ es/all/index.html#all-salt-modules"&gt;module&lt;/a&gt; ecosystem to work with. 
 enough you can write your own. Yes, writing custom models is really simple.&lt;/p&gt;
 &lt;h2&gt;Cloud friendly&lt;/h2&gt;
 &lt;p&gt;Most management and configuration tools out there were born before the Cloud 
-existed or be so popular, so developers didn't pay much attention to it until 
+existed or was so popular, so developers didn't pay much attention to it until 
 it was to late.&lt;/p&gt;
 &lt;p&gt;Salt, on the other hand, was created with &lt;a href="http://docs.saltstack.com/en/la
 test/topics/cloud/"&gt;cloud&lt;/a&gt; in mind from the beginning. This means, in my opinion, two 
@@ -80,9 +81,11 @@ the bus has a tag and a data structure, a dict with information about the
 event. In order to react to this events, you can write state files and map 
 them with the events that need special attention.&lt;/p&gt;
 &lt;p&gt;For example, a typical use case is when you fire up a new production cloud 
-web instance. This will fire up a cloud event into the event bus with 
-information about this new instance. Then should be straightforward to write 
-some sls files in order to configure instance backup and monitoring.&lt;/p&gt;
+web instance. This will write a cloud event into the event bus with 
+information about this new instance. What should happen when a new instance
+gets created and configured? Probably you will want to include it in the backup
+rutine, and you definitly will want to monitor it. No problem, just write the
+proper sls files and map the event with the state file. Good enough?&lt;/p&gt;
 &lt;h2&gt;Minionless nodes&lt;/h2&gt;
 &lt;p&gt;Oh Yeah, Salt can control your nodes without the need to install a client
 there, just by having &lt;a href="http://docs.saltstack.com/en/latest/topics/ssh/"&gt;ssh&lt;/a&gt;

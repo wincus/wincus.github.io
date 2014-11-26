@@ -49,14 +49,15 @@
 		<p>Having worked with <a href="http://puppetlabs.com">puppet</a> for a long time, I run into
 <a href="http://saltstack.com">salt</a> looking for a remote execution tool, as the 
 natural choice under puppet environments, <a href="http://puppetlabs.com
-/mcollective">mcollective</a>, seemed to complicate to install/configure/use/whatsoever.</p>
+/mcollective">mcollective</a> seemed to complicate to install/configure/use/whatsoever.</p>
 <p>So I started digging salty waters, to find that salt was much more than a
 simple remote execution tool.</p>
 <h2>Targeting</h2>
 <p>One of the challenges about remote execution is targeting. Of course you want
-parallel remote execution, but this feature is worthless unless you have smart 
-targeting subsystem.</p>
-<p>How smart is Salt targeting? <a href="http://docs.saltstack.com/en/late
+parallel remote execution in order to break the linear relation between
+execution time and number of targets nodes, but this feature is worthless
+unless you have smart targeting subsystem.</p>
+<p>So, how smart is Salt targeting? <a href="http://docs.saltstack.com/en/late
 st/topics/targeting/">Pretty much!</a></p>
 <p>For example, from the documentation:</p>
 <p><code>salt -G 'os:RedHat' --batch-size 25% apache.signal restart</code></p>
@@ -73,10 +74,10 @@ principles: simplicity, simplicity, simplicity.</p>
 just talking about dictionaries, lists, strings and numbers. If you are coming 
 from puppet, you will need some time to realize that in Salts world it is you 
 who decide how complex things are. The other big difference, in my opinion, is
-that state files in Salt are rendered, and better, you are free to choose the
-render engine, as long as delivers state data to Salt. </p>
-<p>Unless told otherwise, state files are first rendered using the default 
-renderer, <a href="http://jinja.pocoo.org/">Jinja</a> before getting to the YAML parser.</p>
+that state files in Salt are rendered, and gets even better, you are free to 
+choose the render engine, as long as delivers state data to Salt.  Unless told
+otherwise, state files are first rendered using the default renderer,
+<a href="http://jinja.pocoo.org/">Jinja</a> before getting to the YAML parser.</p>
 <p>This allows great flexibility, as shown in this example taken from the
 documentation:</p>
 <div class="highlight"><pre><span class="cp">{%</span> <span class="k">for</span> <span class="nv">mnt</span> <span class="k">in</span> <span class="nv">salt</span><span class="o">[</span><span class="s1">&#39;cmd.run&#39;</span><span class="o">](</span><span class="s1">&#39;ls /dev/data/moose*&#39;</span><span class="o">)</span><span class="nv">.split</span><span class="o">()</span> <span class="cp">%}</span><span class="x"></span>
@@ -100,7 +101,7 @@ es/all/index.html#all-salt-modules">module</a> ecosystem to work with. And if th
 enough you can write your own. Yes, writing custom models is really simple.</p>
 <h2>Cloud friendly</h2>
 <p>Most management and configuration tools out there were born before the Cloud 
-existed or be so popular, so developers didn't pay much attention to it until 
+existed or was so popular, so developers didn't pay much attention to it until 
 it was to late.</p>
 <p>Salt, on the other hand, was created with <a href="http://docs.saltstack.com/en/la
 test/topics/cloud/">cloud</a> in mind from the beginning. This means, in my opinion, two 
@@ -127,9 +128,11 @@ the bus has a tag and a data structure, a dict with information about the
 event. In order to react to this events, you can write state files and map 
 them with the events that need special attention.</p>
 <p>For example, a typical use case is when you fire up a new production cloud 
-web instance. This will fire up a cloud event into the event bus with 
-information about this new instance. Then should be straightforward to write 
-some sls files in order to configure instance backup and monitoring.</p>
+web instance. This will write a cloud event into the event bus with 
+information about this new instance. What should happen when a new instance
+gets created and configured? Probably you will want to include it in the backup
+rutine, and you definitly will want to monitor it. No problem, just write the
+proper sls files and map the event with the state file. Good enough?</p>
 <h2>Minionless nodes</h2>
 <p>Oh Yeah, Salt can control your nodes without the need to install a client
 there, just by having <a href="http://docs.saltstack.com/en/latest/topics/ssh/">ssh</a>
@@ -150,6 +153,18 @@ always a good option.</p>
 	<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 	</p>
 
+	<div class="comments">
+	<h2>Comments !</h2>
+	    <div id="disqus_thread"></div>
+	    <script type="text/javascript">
+	       var disqus_identifier = "salted-puppet.html";
+	       (function() {
+	       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+	       dsq.src = 'http://wincusblog.disqus.com/embed.js';
+	       (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	      })();
+	    </script>
+	</div>
 
 		  </div>	
 		  
