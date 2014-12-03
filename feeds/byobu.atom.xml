@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Wincus Random Notes</title><link href="http://wincus.github.io/" rel="alternate"></link><link href="http://wincus.github.io/feeds/byobu.atom.xml" rel="self"></link><id>http://wincus.github.io/</id><updated>2014-12-03T00:00:00-03:00</updated><entry><title>Abusing byobu's status notifications</title><link href="http://wincus.github.io/abusing-byobus-status-notifications.html" rel="alternate"></link><updated>2014-12-03T00:00:00-03:00</updated><author><name>Wincus</name></author><id>tag:wincus.github.io,2014-12-03:abusing-byobus-status-notifications.html</id><summary type="html">&lt;p&gt;from command line&lt;/p&gt;
-&lt;p&gt;Being myself an absentminded kinda person, I always forget to buy credit
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Wincus Random Notes</title><link href="http://wincus.github.io/" rel="alternate"></link><link href="http://wincus.github.io/feeds/byobu.atom.xml" rel="self"></link><id>http://wincus.github.io/</id><updated>2014-12-03T00:00:00-03:00</updated><entry><title>Abusing byobu's status notifications</title><link href="http://wincus.github.io/abusing-byobus-status-notifications.html" rel="alternate"></link><updated>2014-12-03T00:00:00-03:00</updated><author><name>Wincus</name></author><id>tag:wincus.github.io,2014-12-03:abusing-byobus-status-notifications.html</id><summary type="html">&lt;p&gt;Being myself an absentminded kinda person, I always forget to buy credit
 in order to use the public transportation.&lt;/p&gt;
 &lt;h2&gt;Consequences&lt;/h2&gt;
 &lt;p&gt;It's not a happy moment when I'm already on board and I notice that I ran out
@@ -8,6 +7,6 @@ in order to use the public transportation.&lt;/p&gt;
 which is uncomfortable, or walk, which is worst.&lt;/p&gt;
 &lt;h2&gt;The Solution&lt;/h2&gt;
 &lt;p&gt;It's Really Simple. I'm always working in a command line terminal, so I wrote 
-&lt;a href="https://github.com/wincus/redbus-byobu-status"&gt;this&lt;/a&gt; little web-scrapping i
+&lt;a href="https://github.com/wincus/redbus-byobu-status"&gt;this&lt;/a&gt; little web-scrapping 
 script that shows my credit status on byobu's status line. &lt;/p&gt;
 &lt;p&gt;Thanks for passing by!&lt;/p&gt;</summary><category term="byobu"></category><category term="webscrapping"></category><category term="python"></category><category term="commandline"></category></entry></feed>
