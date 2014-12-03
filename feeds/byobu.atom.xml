@@ -6,7 +6,7 @@ in order to use the public transportation.&lt;/p&gt;
  of credit. Two options are usually available. Asking somebody to pay for me, 
 which is uncomfortable, or walk, which is worst.&lt;/p&gt;
 &lt;h2&gt;The Solution&lt;/h2&gt;
-&lt;p&gt;It's Really Simple. I'm always working in a command line terminal, so I wrote 
-&lt;a href="https://github.com/wincus/redbus-byobu-status"&gt;this&lt;/a&gt; little web-scrapping 
-script that shows my credit status on byobu's status line. &lt;/p&gt;
+&lt;p&gt;It's Really Simple. I spend all my working hours in a command line terminal, 
+so I wrote  &lt;a href="https://github.com/wincus/redbus-byobu-status"&gt;this&lt;/a&gt; little 
+web-scrapping script that shows my credit status on byobu's status line. &lt;/p&gt;
 &lt;p&gt;Thanks for passing by!&lt;/p&gt;</summary><category term="byobu"></category><category term="webscrapping"></category><category term="python"></category><category term="commandline"></category></entry></feed>
