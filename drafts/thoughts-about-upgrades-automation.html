@@ -6,7 +6,7 @@
 	<meta name="author" content="wincus">
 	
 
-  <meta name="description" content="Upgrades don't have to be a pain">
+  <meta name="description" content="Server automatic upgrades, oh my!">
 
 
 
@@ -45,8 +45,127 @@
       by <a class="url fn" href="http://wincus.github.io/author/wincus.html">Wincus</a>
     </address>
   in <a href="http://wincus.github.io/category/devops.html">devops</a>
-<p class="tags">tagged <a href="http://wincus.github.io/tag/debian.html">debian</a>, <a href="http://wincus.github.io/tag/ubuntu.html">ubuntu</a>, <a href="http://wincus.github.io/tag/unattended-upgrades.html">unattended-upgrades</a>, <a href="http://wincus.github.io/tag/.html"></a></p></div>		
-		<p>Thanks for passing by!</p>	
+<p class="tags">tagged <a href="http://wincus.github.io/tag/debian.html">debian</a>, <a href="http://wincus.github.io/tag/ubuntu.html">ubuntu</a>, <a href="http://wincus.github.io/tag/unattended-upgrades.html">unattended-upgrades</a>, <a href="http://wincus.github.io/tag/puppet.html">puppet</a></p></div>		
+		<p>I must confess that I first thought that server upgrades automatization was 
+just crazy. Until one day I was feeling more confident about walking away my
+comfort zone and started playing with it.</p>
+<h2>The Problem</h2>
+<p>If you administrate more than a few servers most probably keep them updated 
+is a pain. You will eventually forget to do it, exposing yourself two big 
+problems. First one, the obvious security consequences, as you are vulnerable
+during that time window. The second problem is more subtle, as bigger updates
+are most probably to fail than small and frequently ones.</p>
+<h2>All servers are equal, but some of them are more equal than others</h2>
+<p>Ok, now that you think that automatic upgrades are a neat idea, lets discuss 
+some implications. Some upgrades require human intervention, whenever a manual 
+merge in the configuration file is needed, for example. Some upgrades require 
+the server to reboot itself, in order to apply the changes. How to deal with it?</p>
+<h2>The Solution</h2>
+<p>Here is an simplified puppet manifest that will:</p>
+<ul>
+<li>install the unattended-upgrades package (only debian based distros, I think)</li>
+<li>
+<p>expose 3 hiera variables:</p>
+<ul>
+<li>auto-reboot: the server will reboot itself if needed</li>
+<li>auto-upgrade: the server will upgrade itself if needed</li>
+<li>auto-update: the server will apt-get update daily</li>
+</ul>
+</li>
+<li>
+<p>configure the package using templates</p>
+</li>
+</ul>
+<div class="highlight"><pre><span class="k">class</span> <span class="n">base_packages::unattendedupgrades</span> {
+
+        <span class="n">include</span> <span class="n">mailutils</span>
+        <span class="n">include</span> <span class="n">ssmtp</span>
+
+        <span class="nv">$auto_reboot</span>  = <span class="n">hiera</span>(<span class="s">&#39;auto_reboot&#39;</span>)
+        <span class="nv">$auto_upgrade</span> = <span class="n">hiera</span>(<span class="s">&#39;auto_upgrade&#39;</span>)
+        <span class="nv">$auto_update</span>  = <span class="n">hiera</span>(<span class="s">&#39;auto_update&#39;</span>)
+
+        <span class="k">package</span> {
+                <span class="s">&quot;unattended-upgrades&quot;</span>:
+                        <span class="n">ensure</span> =&gt; <span class="n">installed</span>,
+        }
+
+        <span class="n">file</span> {
+                <span class="s">&quot;/etc/apt/apt.conf.d/20auto-upgrades&quot;</span>:
+                        <span class="n">ensure</span>    =&gt; <span class="n">present</span>,
+                        <span class="n">owner</span>     =&gt; <span class="n">root</span>,
+                        <span class="n">group</span>     =&gt; <span class="n">root</span>,
+                        <span class="n">mode</span>      =&gt; <span class="mo">0644</span>,
+                        <span class="n">content</span>   =&gt; <span class="n">template</span>(<span class="s">&quot;base_packages/20auto-upgrades.erb&quot;</span>),
+        }
+
+        <span class="n">file</span> {
+                <span class="s">&quot;/etc/apt/apt.conf.d/50unattended-upgrades&quot;</span>:
+                        <span class="n">ensure</span>    =&gt; <span class="n">present</span>,
+                        <span class="n">owner</span>     =&gt; <span class="n">root</span>,
+                        <span class="n">group</span>     =&gt; <span class="n">root</span>,
+                        <span class="n">mode</span>      =&gt; <span class="mo">0644</span>,
+                        <span class="n">content</span>   =&gt; <span class="n">template</span>(<span class="s">&quot;base_packages/50unattended-upgrades.erb&quot;</span>),
+        }
+}
+</pre></div>
+
+
+<p>The templates are pretty straight forward. </p>
+<p>20auto-upgrades:</p>
+<div class="highlight"><pre><span class="x">APT::Periodic::Update-Package-Lists &quot;</span><span class="cp">&lt;%</span> <span class="k">if</span> <span class="vi">@auto_update</span> <span class="o">==</span> <span class="kp">true</span> <span class="cp">%&gt;</span><span class="x"> 1 </span><span class="cp">&lt;%</span> <span class="k">else</span> <span class="cp">%&gt;</span><span class="x"> 0 </span><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x">&quot;;</span>
+<span class="x">APT::Periodic::Unattended-Upgrade &quot;</span><span class="cp">&lt;%</span> <span class="k">if</span> <span class="vi">@auto_upgrade</span> <span class="o">==</span> <span class="kp">true</span> <span class="cp">%&gt;</span><span class="x"> 1 </span><span class="cp">&lt;%</span> <span class="k">else</span> <span class="cp">%&gt;</span><span class="x"> 0 </span><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x">&quot;;</span>
+<span class="x">APT::Periodic::Verbose &quot;1&quot;;</span>
+</pre></div>
+
+
+<p>50unattended-upgrades:</p>
+<div class="highlight"><pre><span class="x">Unattended-Upgrade::Allowed-Origins {</span>
+<span class="x">        &quot;${distro_id}:${distro_codename}-security&quot;;</span>
+<span class="x">        &quot;${distro_id}:${distro_codename}-updates&quot;;</span>
+<span class="x">        &quot;Puppetlabs:precise&quot;;</span>
+<span class="x">        &quot;LP-PPA-saltstack-salt:precise&quot;;</span>
+<span class="x">};</span>
+<span class="x">Unattended-Upgrade::Package-Blacklist {</span>
+<span class="x">};</span>
+<span class="x">Unattended-Upgrade::Mail &quot;your@mail.org&quot;;</span>
+<span class="x">Unattended-Upgrade::Remove-Unused-Dependencies &quot;true&quot;;</span>
+<span class="x">Unattended-Upgrade::Automatic-Reboot </span><span class="cp">&lt;%</span> <span class="k">if</span> <span class="vi">@auto_reboot</span> <span class="cp">%&gt;</span><span class="x"> &quot;true&quot; </span><span class="cp">&lt;%</span> <span class="k">else</span> <span class="cp">%&gt;</span><span class="x"> &quot;false&quot; </span><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x">;</span>
+</pre></div>
+
+
+<p>In other words, only upgrades from official repos, from puppet repo and from
+salt repo are allowed. Set your email address is important, to keep you informed
+about whats going on. If some package require a manual merge configuration file 
+intervention, you will be noticed by email, for you to deal with it.</p>
+<h2>Some Hiera Magic</h2>
+<p>Now I don't want production servers to reboot automatically, cause I rather do
+it myself when I'm sure I won't interrupt some critical mission process. Devel
+and Testing servers are free to do whatever they like. In hieras terms:</p>
+<p>production.yaml:</p>
+<div class="highlight"><pre><span class="n">auto_reboot</span><span class="o">:</span> <span class="kc">false</span>
+<span class="n">auto_upgrade</span><span class="o">:</span> <span class="kc">true</span>
+<span class="n">auto_update</span><span class="o">:</span> <span class="kc">true</span>
+</pre></div>
+
+
+<p>testing.yaml:</p>
+<div class="highlight"><pre><span class="n">auto_reboot</span><span class="o">:</span> <span class="kc">true</span>
+<span class="n">auto_upgrade</span><span class="o">:</span> <span class="kc">true</span>
+<span class="n">auto_update</span><span class="o">:</span> <span class="kc">true</span>
+</pre></div>
+
+
+<p>devel.yaml:</p>
+<div class="highlight"><pre><span class="n">auto_reboot</span><span class="o">:</span> <span class="kc">true</span>
+<span class="n">auto_upgrade</span><span class="o">:</span> <span class="kc">true</span>
+<span class="n">auto_update</span><span class="o">:</span> <span class="kc">true</span>
+</pre></div>
+
+
+<h2>Some Nagios Magic</h2>
+<h2>Conclusions</h2>
+<p>Thanks for passing by!</p>	
 
 	</article>
 
