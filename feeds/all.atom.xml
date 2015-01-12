@@ -1,5 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Wincus Random Notes</title><link href="http://wincus.github.io/" rel="alternate"></link><link href="http://wincus.github.io/feeds/all.atom.xml" rel="self"></link><id>http://wincus.github.io/</id><updated>2014-12-03T00:00:00-03:00</updated><entry><title>Abusing byobu's status notifications</title><link href="http://wincus.github.io/abusing-byobus-status-notifications.html" rel="alternate"></link><updated>2014-12-03T00:00:00-03:00</updated><author><name>Wincus</name></author><id>tag:wincus.github.io,2014-12-03:abusing-byobus-status-notifications.html</id><summary type="html">&lt;p&gt;Being myself an absentminded kinda person, I always forget to buy credit
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Wincus Random Notes</title><link href="http://wincus.github.io/" rel="alternate"></link><link href="http://wincus.github.io/feeds/all.atom.xml" rel="self"></link><id>http://wincus.github.io/</id><updated>2015-01-12T00:00:00-03:00</updated><entry><title>Thoughts about upgrades automation</title><link href="http://wincus.github.io/thoughts-about-upgrades-automation.html" rel="alternate"></link><updated>2015-01-12T00:00:00-03:00</updated><author><name>Wincus</name></author><id>tag:wincus.github.io,2015-01-12:thoughts-about-upgrades-automation.html</id><summary type="html">&lt;p&gt;I must confess that I first thought that server upgrades automatization was 
+just crazy. Until one day I was feeling more confident about walking away my
+comfort zone and started playing with it.&lt;/p&gt;
+&lt;h2&gt;The Problem&lt;/h2&gt;
+&lt;p&gt;If you administrate more than a few servers most probably keep them updated 
+is a pain. You will eventually forget to do it, exposing yourself two big 
+problems. First one, the obvious security consequences, as you are vulnerable
+during that time window. The second problem is more subtle, as bigger updates
+are most probably to fail than small and frequently ones.&lt;/p&gt;
+&lt;h2&gt;All servers are equal, but some of them are more equal than others&lt;/h2&gt;
+&lt;p&gt;Ok, now that you think that automatic upgrades are a neat idea, lets discuss 
+some implications. Some upgrades require human intervention, whenever a manual 
+merge in the configuration file is needed, for example. Some upgrades require 
+the server to reboot itself, in order to apply the changes. How to deal with it?&lt;/p&gt;
+&lt;h2&gt;The Solution&lt;/h2&gt;
+&lt;p&gt;Here is an simplified puppet manifest that will:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;install the unattended-upgrades package (only debian based distros)&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;expose 3 hiera variables:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;auto-reboot: the server will reboot itself if needed&lt;/li&gt;
+&lt;li&gt;auto-upgrade: the server will upgrade itself if needed&lt;/li&gt;
+&lt;li&gt;auto-update: the server will apt-get update daily&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;configure the package using hiera based templates &lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="n"&gt;base_packages::unattendedupgrades&lt;/span&gt; {
+
+        &lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="n"&gt;mailutils&lt;/span&gt;
+        &lt;span class="n"&gt;include&lt;/span&gt; &lt;span class="n"&gt;ssmtp&lt;/span&gt;
+
+        &lt;span class="nv"&gt;$auto_reboot&lt;/span&gt;  = &lt;span class="n"&gt;hiera&lt;/span&gt;(&lt;span class="s"&gt;&amp;#39;auto_reboot&amp;#39;&lt;/span&gt;)
+        &lt;span class="nv"&gt;$auto_upgrade&lt;/span&gt; = &lt;span class="n"&gt;hiera&lt;/span&gt;(&lt;span class="s"&gt;&amp;#39;auto_upgrade&amp;#39;&lt;/span&gt;)
+        &lt;span class="nv"&gt;$auto_update&lt;/span&gt;  = &lt;span class="n"&gt;hiera&lt;/span&gt;(&lt;span class="s"&gt;&amp;#39;auto_update&amp;#39;&lt;/span&gt;)
+
+        &lt;span class="k"&gt;package&lt;/span&gt; {
+                &lt;span class="s"&gt;&amp;quot;unattended-upgrades&amp;quot;&lt;/span&gt;:
+                        &lt;span class="n"&gt;ensure&lt;/span&gt; =&amp;gt; &lt;span class="n"&gt;installed&lt;/span&gt;,
+        }
+
+        &lt;span class="n"&gt;file&lt;/span&gt; {
+                &lt;span class="s"&gt;&amp;quot;/etc/apt/apt.conf.d/20auto-upgrades&amp;quot;&lt;/span&gt;:
+                        &lt;span class="n"&gt;ensure&lt;/span&gt;    =&amp;gt; &lt;span class="n"&gt;present&lt;/span&gt;,
+                        &lt;span class="n"&gt;owner&lt;/span&gt;     =&amp;gt; &lt;span class="n"&gt;root&lt;/span&gt;,
+                        &lt;span class="n"&gt;group&lt;/span&gt;     =&amp;gt; &lt;span class="n"&gt;root&lt;/span&gt;,
+                        &lt;span class="n"&gt;mode&lt;/span&gt;      =&amp;gt; &lt;span class="mo"&gt;0644&lt;/span&gt;,
+                        &lt;span class="n"&gt;content&lt;/span&gt;   =&amp;gt; &lt;span class="n"&gt;template&lt;/span&gt;(&lt;span class="s"&gt;&amp;quot;base_packages/20auto-upgrades.erb&amp;quot;&lt;/span&gt;),
+        }
+
+        &lt;span class="n"&gt;file&lt;/span&gt; {
+                &lt;span class="s"&gt;&amp;quot;/etc/apt/apt.conf.d/50unattended-upgrades&amp;quot;&lt;/span&gt;:
+                        &lt;span class="n"&gt;ensure&lt;/span&gt;    =&amp;gt; &lt;span class="n"&gt;present&lt;/span&gt;,
+                        &lt;span class="n"&gt;owner&lt;/span&gt;     =&amp;gt; &lt;span class="n"&gt;root&lt;/span&gt;,
+                        &lt;span class="n"&gt;group&lt;/span&gt;     =&amp;gt; &lt;span class="n"&gt;root&lt;/span&gt;,
+                        &lt;span class="n"&gt;mode&lt;/span&gt;      =&amp;gt; &lt;span class="mo"&gt;0644&lt;/span&gt;,
+                        &lt;span class="n"&gt;content&lt;/span&gt;   =&amp;gt; &lt;span class="n"&gt;template&lt;/span&gt;(&lt;span class="s"&gt;&amp;quot;base_packages/50unattended-upgrades.erb&amp;quot;&lt;/span&gt;),
+        }
+}
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;The templates are pretty straight forward:&lt;/p&gt;
+&lt;p&gt;20auto-upgrades:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="x"&gt;APT::Periodic::Update-Package-Lists &amp;quot;&lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vi"&gt;@auto_update&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kp"&gt;true&lt;/span&gt; &lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt; 1 &lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt; 0 &lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="k"&gt;end&lt;/span&gt; &lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt;&amp;quot;;&lt;/span&gt;
+&lt;span class="x"&gt;APT::Periodic::Unattended-Upgrade &amp;quot;&lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vi"&gt;@auto_upgrade&lt;/span&gt; &lt;span class="o"&gt;==&lt;/span&gt; &lt;span class="kp"&gt;true&lt;/span&gt; &lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt; 1 &lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt; 0 &lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="k"&gt;end&lt;/span&gt; &lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt;&amp;quot;;&lt;/span&gt;
+&lt;span class="x"&gt;APT::Periodic::Verbose &amp;quot;1&amp;quot;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;50unattended-upgrades:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="x"&gt;Unattended-Upgrade::Allowed-Origins {&lt;/span&gt;
+&lt;span class="x"&gt;        &amp;quot;${distro_id}:${distro_codename}-security&amp;quot;;&lt;/span&gt;
+&lt;span class="x"&gt;        &amp;quot;${distro_id}:${distro_codename}-updates&amp;quot;;&lt;/span&gt;
+&lt;span class="x"&gt;        &amp;quot;Puppetlabs:precise&amp;quot;;&lt;/span&gt;
+&lt;span class="x"&gt;        &amp;quot;LP-PPA-saltstack-salt:precise&amp;quot;;&lt;/span&gt;
+&lt;span class="x"&gt;};&lt;/span&gt;
+&lt;span class="x"&gt;Unattended-Upgrade::Package-Blacklist {&lt;/span&gt;
+&lt;span class="x"&gt;};&lt;/span&gt;
+&lt;span class="x"&gt;Unattended-Upgrade::Mail &amp;quot;your@mail.org&amp;quot;;&lt;/span&gt;
+&lt;span class="x"&gt;Unattended-Upgrade::Remove-Unused-Dependencies &amp;quot;true&amp;quot;;&lt;/span&gt;
+&lt;span class="x"&gt;Unattended-Upgrade::Automatic-Reboot &lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="vi"&gt;@auto_reboot&lt;/span&gt; &lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt; &amp;quot;true&amp;quot; &lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="k"&gt;else&lt;/span&gt; &lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt; &amp;quot;false&amp;quot; &lt;/span&gt;&lt;span class="cp"&gt;&amp;lt;%&lt;/span&gt; &lt;span class="k"&gt;end&lt;/span&gt; &lt;span class="cp"&gt;%&amp;gt;&lt;/span&gt;&lt;span class="x"&gt;;&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;In other words, only upgrades from official repos, from puppet repo and from
+salt repo are allowed. Setting your email address is important to keep you 
+informed about whats going on. If some package require a manual merge 
+configuration file intervention, you will be noticed by email, for you to 
+deal with it.&lt;/p&gt;
+&lt;h2&gt;Some Hiera Magic&lt;/h2&gt;
+&lt;p&gt;Now I don't want production servers to reboot automatically, cause I rather do
+it myself when I'm sure I won't interrupt some critical mission process's. 
+Devel and Testing servers are free to do whatever they like. &lt;/p&gt;
+&lt;p&gt;So, in hieras terms:&lt;/p&gt;
+&lt;p&gt;production.yaml:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;auto_reboot&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;false&lt;/span&gt;
+&lt;span class="n"&gt;auto_upgrade&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+&lt;span class="n"&gt;auto_update&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;testing.yaml:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;auto_reboot&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+&lt;span class="n"&gt;auto_upgrade&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+&lt;span class="n"&gt;auto_update&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;devel.yaml:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;&lt;span class="n"&gt;auto_reboot&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+&lt;span class="n"&gt;auto_upgrade&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+&lt;span class="n"&gt;auto_update&lt;/span&gt;&lt;span class="o"&gt;:&lt;/span&gt; &lt;span class="kc"&gt;true&lt;/span&gt;
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;h2&gt;Here comes some Nagios Magic&lt;/h2&gt;
+&lt;p&gt;OK, production servers will send an email requesting a manual reboot within a
+ proper time window. This works unless you get lots of emails, like me. 
+The monitoring server is probably a better way to handle this information. &lt;/p&gt;
+&lt;p&gt;As we use nagios with nrpe, this single liner will do the trick:&lt;/p&gt;
+&lt;div class="highlight"&gt;&lt;pre&gt;command[check_reboot_required]=/usr/lib/nagios/plugins/negate --ok=WARNING --warning=OK --critical=OK -s /usr/lib/nagios/plugins/check_file_age -c 0 -w 0 -W 0 -f /var/run/reboot-required
+&lt;/pre&gt;&lt;/div&gt;
+
+
+&lt;p&gt;As usual, YMMV, &lt;/p&gt;
+&lt;p&gt;Thanks for passing by!&lt;/p&gt;</summary><category term="debian"></category><category term="ubuntu"></category><category term="unattended-upgrades"></category><category term="puppet"></category></entry><entry><title>Abusing byobu's status notifications</title><link href="http://wincus.github.io/abusing-byobus-status-notifications.html" rel="alternate"></link><updated>2014-12-03T00:00:00-03:00</updated><author><name>Wincus</name></author><id>tag:wincus.github.io,2014-12-03:abusing-byobus-status-notifications.html</id><summary type="html">&lt;p&gt;Being myself an absentminded kinda person, I always forget to buy credit
 in order to use the public transportation.&lt;/p&gt;
 &lt;h2&gt;Consequences&lt;/h2&gt;
 &lt;p&gt;It's not a happy moment when I'm already on board and I notice that I ran out
