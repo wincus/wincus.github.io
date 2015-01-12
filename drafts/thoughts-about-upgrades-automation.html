@@ -63,7 +63,7 @@ the server to reboot itself, in order to apply the changes. How to deal with it?
 <h2>The Solution</h2>
 <p>Here is an simplified puppet manifest that will:</p>
 <ul>
-<li>install the unattended-upgrades package (only debian based distros, I think)</li>
+<li>install the unattended-upgrades package (only debian based distros)</li>
 <li>
 <p>expose 3 hiera variables:</p>
 <ul>
@@ -73,7 +73,7 @@ the server to reboot itself, in order to apply the changes. How to deal with it?
 </ul>
 </li>
 <li>
-<p>configure the package using templates</p>
+<p>configure the package using hiera based templates </p>
 </li>
 </ul>
 <div class="highlight"><pre><span class="k">class</span> <span class="n">base_packages::unattendedupgrades</span> {
@@ -111,7 +111,7 @@ the server to reboot itself, in order to apply the changes. How to deal with it?
 </pre></div>
 
 
-<p>The templates are pretty straight forward. </p>
+<p>The templates are pretty straight forward:</p>
 <p>20auto-upgrades:</p>
 <div class="highlight"><pre><span class="x">APT::Periodic::Update-Package-Lists &quot;</span><span class="cp">&lt;%</span> <span class="k">if</span> <span class="vi">@auto_update</span> <span class="o">==</span> <span class="kp">true</span> <span class="cp">%&gt;</span><span class="x"> 1 </span><span class="cp">&lt;%</span> <span class="k">else</span> <span class="cp">%&gt;</span><span class="x"> 0 </span><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x">&quot;;</span>
 <span class="x">APT::Periodic::Unattended-Upgrade &quot;</span><span class="cp">&lt;%</span> <span class="k">if</span> <span class="vi">@auto_upgrade</span> <span class="o">==</span> <span class="kp">true</span> <span class="cp">%&gt;</span><span class="x"> 1 </span><span class="cp">&lt;%</span> <span class="k">else</span> <span class="cp">%&gt;</span><span class="x"> 0 </span><span class="cp">&lt;%</span> <span class="k">end</span> <span class="cp">%&gt;</span><span class="x">&quot;;</span>
@@ -135,13 +135,15 @@ the server to reboot itself, in order to apply the changes. How to deal with it?
 
 
 <p>In other words, only upgrades from official repos, from puppet repo and from
-salt repo are allowed. Set your email address is important, to keep you informed
-about whats going on. If some package require a manual merge configuration file 
-intervention, you will be noticed by email, for you to deal with it.</p>
+salt repo are allowed. Setting your email address is important to keep you 
+informed about whats going on. If some package require a manual merge 
+configuration file intervention, you will be noticed by email, for you to 
+deal with it.</p>
 <h2>Some Hiera Magic</h2>
 <p>Now I don't want production servers to reboot automatically, cause I rather do
-it myself when I'm sure I won't interrupt some critical mission process. Devel
-and Testing servers are free to do whatever they like. In hieras terms:</p>
+it myself when I'm sure I won't interrupt some critical mission process's. 
+Devel and Testing servers are free to do whatever they like. </p>
+<p>So, in hieras terms:</p>
 <p>production.yaml:</p>
 <div class="highlight"><pre><span class="n">auto_reboot</span><span class="o">:</span> <span class="kc">false</span>
 <span class="n">auto_upgrade</span><span class="o">:</span> <span class="kc">true</span>
@@ -163,8 +165,16 @@ and Testing servers are free to do whatever they like. In hieras terms:</p>
 </pre></div>
 
 
-<h2>Some Nagios Magic</h2>
-<h2>Conclusions</h2>
+<h2>Here comes some Nagios Magic</h2>
+<p>OK, production servers will send an email requesting a manual reboot within a
+ proper time window. This works unless you get lots of emails, like me. 
+The monitoring server is probably a better way to handle this information. </p>
+<p>As we use nagios with nrpe, this single liner will do the trick:</p>
+<div class="highlight"><pre>command[check_reboot_required]=/usr/lib/nagios/plugins/negate --ok=WARNING --warning=OK --critical=OK -s /usr/lib/nagios/plugins/check_file_age -c 0 -w 0 -W 0 -f /var/run/reboot-required
+</pre></div>
+
+
+<p>As usual, YMMV, </p>
 <p>Thanks for passing by!</p>	
 
 	</article>
